@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ user.name }} (@{{ user.username }}) / Twitter{% endblock %}
+{% block title %}{{ profile_user.name }} (@{{ profile_user.username }}) / Twitter{% endblock %}
 
 {% block content %}
 <div class="twitter-container">
@@ -21,7 +21,7 @@
                 <span class="nav-text">사용자</span>
             </a>
             
-            <a href="{{ url_for('profile') }}" class="nav-item active">
+            <a href="{{ url_for('profile') }}" class="nav-item">
                 <span class="nav-icon">👤</span>
                 <span class="nav-text">프로필</span>
             </a>
@@ -39,8 +39,8 @@
             <div style="display: flex; align-items: center; gap: 32px;">
                 <button onclick="history.back()" style="background: none; border: none; font-size: 20px; cursor: pointer; padding: 8px; border-radius: 50%; transition: background 0.2s;">←</button>
                 <div>
-                    <div style="font-size: 20px; font-weight: bold;">{{ user.name }}</div>
-                    <div style="font-size: 13px; color: var(--text-secondary);">{{ user.tweets.count() }} 트윗</div>
+                    <div style="font-size: 20px; font-weight: bold;">{{ profile_user.name }}</div>
+                    <div style="font-size: 13px; color: var(--text-secondary);">{{ tweets|length }} 트윗</div>
                 </div>
             </div>
         </div>
@@ -52,32 +52,45 @@
         <div style="padding: 16px; border-bottom: 1px solid var(--border-color);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: -67px; margin-bottom: 12px;">
                 <div class="avatar" style="width: 134px; height: 134px; font-size: 48px; border: 4px solid white;">
-                    {{ user.name[0] if user.name else 'U' }}
+                    {{ profile_user.name[0] if profile_user.name else 'U' }}
                 </div>
-                <button class="btn" style="margin-top: 67px; padding: 8px 16px; border: 1px solid var(--border-color); border-radius: 9999px; font-weight: bold;">프로필 수정</button>
+                
+                {% if user.id != profile_user.id %}
+                <div style="margin-top: 67px;">
+                    {% if user.is_following(profile_user) %}
+                    <button id="followButton" class="following-button" onclick="toggleFollow()" style="padding: 8px 16px; border-radius: 9999px; font-weight: bold; cursor: pointer;">
+                        팔로잉
+                    </button>
+                    {% else %}
+                    <button id="followButton" class="follow-button" onclick="toggleFollow()" style="padding: 8px 16px; border-radius: 9999px; font-weight: bold; cursor: pointer;">
+                        팔로우
+                    </button>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
             
             <div style="margin-bottom: 12px;">
-                <h2 style="font-size: 20px; font-weight: bold;">{{ user.name }}</h2>
-                <p style="color: var(--text-secondary); font-size: 15px;">@{{ user.username }}</p>
+                <h2 style="font-size: 20px; font-weight: bold;">{{ profile_user.name }}</h2>
+                <p style="color: var(--text-secondary); font-size: 15px;">@{{ profile_user.username }}</p>
             </div>
             
-            {% if user.profile %}
-            <p style="margin-bottom: 12px; font-size: 15px;">{{ user.profile }}</p>
+            {% if profile_user.profile %}
+            <p style="margin-bottom: 12px; font-size: 15px;">{{ profile_user.profile }}</p>
             {% endif %}
             
             <div style="display: flex; gap: 8px; color: var(--text-secondary); font-size: 15px; margin-bottom: 12px;">
                 <span>📅</span>
-                <span>{{ user.created_at.strftime('%Y년 %m월') }}에 가입함</span>
+                <span>{{ profile_user.created_at.strftime('%Y년 %m월') }}에 가입함</span>
             </div>
             
             <div style="display: flex; gap: 20px; font-size: 14px;">
                 <div>
-                    <strong style="color: var(--text-primary); font-weight: bold;">{{ user.following.count() }}</strong>
+                    <strong style="color: var(--text-primary); font-weight: bold;">{{ profile_user.following.count() }}</strong>
                     <span style="color: var(--text-secondary);"> 팔로잉</span>
                 </div>
                 <div>
-                    <strong style="color: var(--text-primary); font-weight: bold;">{{ user.followers.count() }}</strong>
+                    <strong style="color: var(--text-primary); font-weight: bold;">{{ profile_user.followers.count() }}</strong>
                     <span style="color: var(--text-secondary);"> 팔로워</span>
                 </div>
             </div>
@@ -88,23 +101,22 @@
             <div class="tab active">트윗</div>
             <div class="tab">답글</div>
             <div class="tab">미디어</div>
-            <div class="tab">마음에 들어요</div>
         </div>
         
         <!-- 트윗 목록 -->
         <div>
-            {% if user.tweets.count() > 0 %}
-                {% for tweet in user.tweets.order_by(user.tweets.c.created_at.desc()) %}
+            {% if tweets %}
+                {% for tweet in tweets %}
                 <div class="tweet-card">
                     <div class="tweet-content-wrapper">
                         <div class="avatar">
-                            {{ user.name[0] if user.name else 'U' }}
+                            {{ profile_user.name[0] if profile_user.name else 'U' }}
                         </div>
                         
                         <div class="tweet-body">
                             <div class="tweet-header">
-                                <span class="tweet-author">{{ user.name }}</span>
-                                <span class="tweet-username">@{{ user.username }}</span>
+                                <span class="tweet-author">{{ profile_user.name }}</span>
+                                <span class="tweet-username">@{{ profile_user.username }}</span>
                                 <span class="tweet-dot">·</span>
                                 <span class="tweet-time">{{ tweet.created_at.strftime('%m월 %d일') }}</span>
                             </div>
@@ -134,7 +146,7 @@
             {% else %}
                 <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
                     <h3 style="margin-bottom: 8px;">아직 트윗이 없습니다</h3>
-                    <p>첫 트윗을 작성해보세요!</p>
+                    <p>@{{ profile_user.username }}님이 트윗하면 여기에 표시됩니다</p>
                 </div>
             {% endif %}
         </div>
@@ -147,4 +159,46 @@
         </div>
     </div>
 </div>
+
+<script>
+let isFollowing = {{ 'true' if user.is_following(profile_user) else 'false' }};
+
+async function toggleFollow() {
+    const button = document.getElementById('followButton');
+    button.disabled = true;
+    
+    const endpoint = isFollowing ? '/api/unfollow/{{ profile_user.id }}' : '/api/follow/{{ profile_user.id }}';
+    
+    try {
+        const response = await fetch(endpoint, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            isFollowing = !isFollowing;
+            
+            if (isFollowing) {
+                button.textContent = '팔로잉';
+                button.className = 'following-button';
+            } else {
+                button.textContent = '팔로우';
+                button.className = 'follow-button';
+            }
+            
+            // 페이지 새로고침하여 팔로워 수 업데이트
+            setTimeout(() => location.reload(), 500);
+        } else {
+            alert('작업 실패');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('오류가 발생했습니다');
+    } finally {
+        button.disabled = false;
+    }
+}
+</script>
 {% endblock %}

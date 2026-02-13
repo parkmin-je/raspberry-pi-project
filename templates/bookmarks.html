@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}북마크 / Twitter{% endblock %}
+
+{% block content %}
+<div class="twitter-container">
+    <!-- 왼쪽 사이드바 -->
+    <div class="left-sidebar">
+        <a href="{{ url_for('timeline') }}" class="logo">🐦</a>
+        
+        <nav>
+            <a href="{{ url_for('timeline') }}" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">홈</span>
+            </a>
+            
+            <a href="{{ url_for('bookmarks') }}" class="nav-item active">
+                <span class="nav-icon">🔖</span>
+                <span class="nav-text">북마크</span>
+            </a>
+            
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">프로필</span>
+            </a>
+            
+            <a href="{{ url_for('logout') }}" class="nav-item">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-text">로그아웃</span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- 중앙 피드 -->
+    <div class="main-feed">
+        <div class="feed-header">북마크</div>
+        
+        <div>
+            {% if tweets %}
+                {% for tweet in tweets %}
+                {% if tweet %}
+                <div class="tweet-card">
+                    <div class="tweet-content-wrapper">
+                        <div class="avatar">{{ tweet.author.name[0] if tweet.author.name else 'U' }}</div>
+                        
+                        <div class="tweet-body">
+                            <div class="tweet-header">
+                                <span class="tweet-author">{{ tweet.author.name }}</span>
+                                <span class="tweet-username">@{{ tweet.author.username }}</span>
+                                <span class="tweet-dot">·</span>
+                                <span class="tweet-time">{{ tweet.created_at.strftime('%m월 %d일') }}</span>
+                            </div>
+                            
+                            <div class="tweet-text">{{ tweet.content }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🔖</div>
+                    <h3 style="margin-bottom: 8px;">저장된 트윗이 없습니다</h3>
+                    <p>나중에 쉽게 찾을 수 있도록 트윗을 북마크에 추가하세요</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- 오른쪽 사이드바 -->
+    <div class="right-sidebar">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="북마크 검색">
+        </div>
+    </div>
+</div>
+{% endblock %}

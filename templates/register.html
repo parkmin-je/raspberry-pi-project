@@ -1,28 +1,148 @@
 {% extends "base.html" %}
 
-{% block title %}회원가입 - NexusApp{% endblock %}
+{% block title %}Twitter 가입하기{% endblock %}
 
 {% block content %}
-<div style="max-width: 480px; margin: 60px auto;">
-    <div style="text-align: center; margin-bottom: 40px;">
-        <a href="{{ url_for('index') }}" class="logo" style="display: inline-flex; text-decoration: none;">
-            <div class="logo-icon">⚡</div>
-            <span>NexusApp</span>
-        </a>
-    </div>
+<style>
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-primary);
+        padding: 20px;
+    }
     
-    <div class="glass-card">
-        <div style="text-align: center; margin-bottom: 32px;">
-            <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 8px;">계정 만들기</h2>
-            <p style="color: var(--text-secondary); font-size: 15px;">무료로 시작하고 언제든 업그레이드하세요</p>
+    .auth-box {
+        width: 100%;
+        max-width: 600px;
+        padding: 40px;
+    }
+    
+    .auth-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+    
+    .back-button {
+        font-size: 20px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+    
+    .back-button:hover {
+        background: var(--hover-bg);
+    }
+    
+    .auth-logo {
+        font-size: 32px;
+        margin: 0 auto;
+    }
+    
+    .auth-title {
+        font-size: 31px;
+        font-weight: bold;
+        margin-bottom: 32px;
+    }
+    
+    .form-group {
+        margin-bottom: 24px;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 15px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 16px;
+        font-size: 17px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    
+    .form-input:focus {
+        border-color: var(--twitter-blue);
+        border-width: 2px;
+        padding: 15px;
+    }
+    
+    .error-message {
+        color: #F91880;
+        font-size: 13px;
+        margin-top: 8px;
+        display: block;
+    }
+    
+    .submit-button {
+        width: 100%;
+        padding: 16px;
+        background: var(--text-primary);
+        color: white;
+        border: none;
+        border-radius: 9999px;
+        font-size: 17px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 24px;
+    }
+    
+    .submit-button:hover {
+        background: #272C30;
+    }
+    
+    .auth-link {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .auth-link a {
+        color: var(--twitter-blue);
+        text-decoration: none;
+    }
+    
+    .auth-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-box">
+        <div class="auth-header">
+            <button class="back-button" onclick="location.href='{{ url_for('index') }}'">←</button>
+            <div class="auth-logo">🐦</div>
         </div>
+        
+        <h1 class="auth-title">계정을 생성하세요</h1>
         
         <form method="POST" novalidate>
             {{ form.hidden_tag() }}
             
             <div class="form-group">
-                {{ form.username.label }}
-                {{ form.username(placeholder="영문, 숫자, 언더스코어 4-20자", autocomplete="username") }}
+                <label class="form-label">이름</label>
+                {{ form.name(class="form-input", placeholder="이름", autocomplete="name") }}
+                {% if form.name.errors %}
+                    {% for error in form.name.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">아이디</label>
+                {{ form.username(class="form-input", placeholder="아이디", autocomplete="username") }}
                 {% if form.username.errors %}
                     {% for error in form.username.errors %}
                         <span class="error-message">{{ error }}</span>
@@ -31,8 +151,8 @@
             </div>
             
             <div class="form-group">
-                {{ form.email.label }}
-                {{ form.email(placeholder="your@email.com", autocomplete="email") }}
+                <label class="form-label">이메일</label>
+                {{ form.email(class="form-input", placeholder="이메일", autocomplete="email") }}
                 {% if form.email.errors %}
                     {% for error in form.email.errors %}
                         <span class="error-message">{{ error }}</span>
@@ -41,8 +161,18 @@
             </div>
             
             <div class="form-group">
-                {{ form.password.label }}
-                {{ form.password(placeholder="최소 6자 이상", autocomplete="new-password") }}
+                <label class="form-label">프로필 소개 (선택)</label>
+                {{ form.profile(class="form-input", placeholder="자신을 소개해보세요", rows="3", style="resize: vertical;") }}
+                {% if form.profile.errors %}
+                    {% for error in form.profile.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">비밀번호</label>
+                {{ form.password(class="form-input", placeholder="비밀번호", autocomplete="new-password") }}
                 {% if form.password.errors %}
                     {% for error in form.password.errors %}
                         <span class="error-message">{{ error }}</span>
@@ -51,8 +181,8 @@
             </div>
             
             <div class="form-group">
-                {{ form.confirm_password.label }}
-                {{ form.confirm_password(placeholder="비밀번호를 다시 입력하세요", autocomplete="new-password") }}
+                <label class="form-label">비밀번호 확인</label>
+                {{ form.confirm_password(class="form-input", placeholder="비밀번호 확인", autocomplete="new-password") }}
                 {% if form.confirm_password.errors %}
                     {% for error in form.confirm_password.errors %}
                         <span class="error-message">{{ error }}</span>
@@ -60,39 +190,12 @@
                 {% endif %}
             </div>
             
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 16px; margin-top: 8px;">
-                무료로 시작하기
-            </button>
+            <button type="submit" class="submit-button">가입하기</button>
         </form>
         
-        <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
-            <p style="color: var(--text-secondary); font-size: 14px;">
-                이미 계정이 있으신가요? 
-                <a href="{{ url_for('login') }}" style="color: #6366f1; text-decoration: none; font-weight: 600; margin-left: 4px;">
-                    로그인 →
-                </a>
-            </p>
-        </div>
-    </div>
-    
-    <div style="text-align: center; margin-top: 24px;">
-        <a href="{{ url_for('index') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: color 0.3s;">
-            ← 홈으로 돌아가기
-        </a>
-    </div>
-    
-    <div style="margin-top: 32px; padding: 20px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; backdrop-filter: blur(10px);">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-            <span style="font-size: 20px;">✓</span>
-            <span style="color: var(--text-secondary); font-size: 13px;">신용카드 불필요</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-            <span style="font-size: 20px;">✓</span>
-            <span style="color: var(--text-secondary); font-size: 13px;">언제든지 취소 가능</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 20px;">✓</span>
-            <span style="color: var(--text-secondary); font-size: 13px;">30초 안에 시작</span>
+        <div class="auth-link">
+            <span style="color: var(--text-secondary);">이미 계정이 있으신가요?</span>
+            <a href="{{ url_for('login') }}"> 로그인</a>
         </div>
     </div>
 </div>

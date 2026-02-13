@@ -1,28 +1,115 @@
 {% extends "base.html" %}
 
-{% block title %}로그인 - NexusApp{% endblock %}
+{% block title %}Twitter에 로그인하기{% endblock %}
 
 {% block content %}
-<div style="max-width: 480px; margin: 60px auto;">
-    <div style="text-align: center; margin-bottom: 40px;">
-        <a href="{{ url_for('index') }}" class="logo" style="display: inline-flex; text-decoration: none;">
-            <div class="logo-icon">⚡</div>
-            <span>NexusApp</span>
-        </a>
-    </div>
+<style>
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-primary);
+    }
     
-    <div class="glass-card">
-        <div style="text-align: center; margin-bottom: 32px;">
-            <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 8px;">다시 오셨군요!</h2>
-            <p style="color: var(--text-secondary); font-size: 15px;">계정에 로그인하여 계속하세요</p>
-        </div>
+    .auth-box {
+        width: 100%;
+        max-width: 600px;
+        padding: 40px;
+    }
+    
+    .auth-logo {
+        font-size: 42px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .auth-title {
+        font-size: 31px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 32px;
+    }
+    
+    .form-group {
+        margin-bottom: 24px;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 15px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 16px;
+        font-size: 17px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    
+    .form-input:focus {
+        border-color: var(--twitter-blue);
+        border-width: 2px;
+        padding: 15px;
+    }
+    
+    .error-message {
+        color: #F91880;
+        font-size: 13px;
+        margin-top: 8px;
+        display: block;
+    }
+    
+    .submit-button {
+        width: 100%;
+        padding: 16px;
+        background: var(--text-primary);
+        color: white;
+        border: none;
+        border-radius: 9999px;
+        font-size: 17px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 8px;
+    }
+    
+    .submit-button:hover {
+        background: #272C30;
+    }
+    
+    .auth-link {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .auth-link a {
+        color: var(--twitter-blue);
+        text-decoration: none;
+    }
+    
+    .auth-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-box">
+        <div class="auth-logo">🐦</div>
+        <h1 class="auth-title">Twitter에 로그인하기</h1>
         
         <form method="POST" novalidate>
             {{ form.hidden_tag() }}
             
             <div class="form-group">
-                {{ form.username.label }}
-                {{ form.username(placeholder="아이디를 입력하세요", autocomplete="username") }}
+                <label class="form-label">아이디</label>
+                {{ form.username(class="form-input", placeholder="아이디를 입력하세요", autocomplete="username") }}
                 {% if form.username.errors %}
                     {% for error in form.username.errors %}
                         <span class="error-message">{{ error }}</span>
@@ -31,8 +118,8 @@
             </div>
             
             <div class="form-group">
-                {{ form.password.label }}
-                {{ form.password(placeholder="비밀번호를 입력하세요", autocomplete="current-password") }}
+                <label class="form-label">비밀번호</label>
+                {{ form.password(class="form-input", placeholder="비밀번호를 입력하세요", autocomplete="current-password") }}
                 {% if form.password.errors %}
                     {% for error in form.password.errors %}
                         <span class="error-message">{{ error }}</span>
@@ -40,25 +127,17 @@
                 {% endif %}
             </div>
             
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 16px; margin-top: 8px;">
-                로그인
-            </button>
+            <button type="submit" class="submit-button">로그인</button>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="#" style="color: var(--twitter-blue); text-decoration: none; font-size: 15px;">비밀번호를 잊으셨나요?</a>
+            </div>
         </form>
         
-        <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
-            <p style="color: var(--text-secondary); font-size: 14px;">
-                계정이 없으신가요? 
-                <a href="{{ url_for('register') }}" style="color: #6366f1; text-decoration: none; font-weight: 600; margin-left: 4px;">
-                    회원가입 →
-                </a>
-            </p>
+        <div class="auth-link">
+            <span style="color: var(--text-secondary);">Twitter 계정이 없으신가요?</span>
+            <a href="{{ url_for('register') }}"> 가입하기</a>
         </div>
-    </div>
-    
-    <div style="text-align: center; margin-top: 24px;">
-        <a href="{{ url_for('index') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: color 0.3s;">
-            ← 홈으로 돌아가기
-        </a>
     </div>
 </div>
 {% endblock %}
