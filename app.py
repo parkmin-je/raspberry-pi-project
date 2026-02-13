@@ -68,6 +68,38 @@ def tweet():
     
     return '', 200
 
+@app.route('/tweet', methods=['DELETE'])
+def delete_tweet():
+    """트윗 삭제"""
+    delete_data = request.json
+    
+    # 필수 필드 검증
+    if not delete_data.get('id') or not delete_data.get('tweet'):
+        return '', 400
+    
+    user_id = delete_data['id']
+    tweet_content = delete_data['tweet']
+    
+    # 유저 존재 확인
+    if user_id not in app.users:
+        return '', 400
+    
+    # 해당 유저의 해당 트윗 찾기
+    tweet_to_delete = None
+    for tweet in app.tweets:
+        if tweet['user_id'] == user_id and tweet['tweet'] == tweet_content:
+            tweet_to_delete = tweet
+            break
+    
+    # 트윗이 없거나 다른 사람의 트윗인 경우
+    if not tweet_to_delete:
+        return '', 400
+    
+    # 트윗 삭제
+    app.tweets.remove(tweet_to_delete)
+    
+    return '', 200
+
 @app.route('/follow', methods=['POST'])
 def follow():
     """팔로우"""
