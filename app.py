@@ -141,5 +141,16 @@ def timeline(user_id):
         'timeline': timeline_tweets
     }), 200
 
+@app.route('/user/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    """유저 정보 조회"""
+    # 유저 존재 확인
+    if user_id not in app.users:
+        return '', 400
+    
+    user = app.users[user_id]
+    
+    return jsonify(user), 200
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
