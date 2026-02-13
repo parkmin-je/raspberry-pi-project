@@ -152,5 +152,15 @@ def get_user(user_id):
     
     return jsonify(user), 200
 
+@app.route('/users', methods=['GET'])
+def get_users():
+    """전체 유저 목록 조회 (password 제외)"""
+    users_list = [
+        {key: value for key, value in user.items() if key != 'password'}
+        for user in app.users.values()
+    ]
+    
+    return jsonify(users_list), 200
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
