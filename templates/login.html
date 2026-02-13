@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Twitter에 로그인하기{% endblock %}
+
+{% block content %}
+<style>
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-primary);
+    }
+    
+    .auth-box {
+        width: 100%;
+        max-width: 600px;
+        padding: 40px;
+    }
+    
+    .auth-logo {
+        font-size: 42px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .auth-title {
+        font-size: 31px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 32px;
+    }
+    
+    .form-group {
+        margin-bottom: 24px;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 15px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 16px;
+        font-size: 17px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    
+    .form-input:focus {
+        border-color: var(--twitter-blue);
+        border-width: 2px;
+        padding: 15px;
+    }
+    
+    .error-message {
+        color: #F91880;
+        font-size: 13px;
+        margin-top: 8px;
+        display: block;
+    }
+    
+    .submit-button {
+        width: 100%;
+        padding: 16px;
+        background: var(--text-primary);
+        color: white;
+        border: none;
+        border-radius: 9999px;
+        font-size: 17px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 8px;
+    }
+    
+    .submit-button:hover {
+        background: #272C30;
+    }
+    
+    .auth-link {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .auth-link a {
+        color: var(--twitter-blue);
+        text-decoration: none;
+    }
+    
+    .auth-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-box">
+        <div class="auth-logo">🐦</div>
+        <h1 class="auth-title">Twitter에 로그인하기</h1>
+        
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                <label class="form-label">아이디</label>
+                {{ form.username(class="form-input", placeholder="아이디를 입력하세요", autocomplete="username") }}
+                {% if form.username.errors %}
+                    {% for error in form.username.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">비밀번호</label>
+                {{ form.password(class="form-input", placeholder="비밀번호를 입력하세요", autocomplete="current-password") }}
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="submit-button">로그인</button>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="#" style="color: var(--twitter-blue); text-decoration: none; font-size: 15px;">비밀번호를 잊으셨나요?</a>
+            </div>
+        </form>
+        
+        <div class="auth-link">
+            <span style="color: var(--text-secondary);">Twitter 계정이 없으신가요?</span>
+            <a href="{{ url_for('register') }}"> 가입하기</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

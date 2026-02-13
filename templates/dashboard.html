@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}홈 / Twitter{% endblock %}
+
+{% block content %}
+<div class="twitter-container">
+    <!-- 왼쪽 사이드바 -->
+    <div class="left-sidebar">
+        <a href="{{ url_for('timeline') }}" class="logo">
+            🐦
+        </a>
+        
+        <nav>
+            <a href="{{ url_for('timeline') }}" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">홈</span>
+            </a>
+            
+            <a href="#" class="nav-item">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-text">탐색하기</span>
+            </a>
+            
+            <a href="#" class="nav-item">
+                <span class="nav-icon">🔔</span>
+                <span class="nav-text">알림</span>
+            </a>
+            
+            <a href="#" class="nav-item">
+                <span class="nav-icon">✉️</span>
+                <span class="nav-text">쪽지</span>
+            </a>
+            
+            <a href="{{ url_for('users_list') }}" class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span class="nav-text">사용자</span>
+            </a>
+            
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">프로필</span>
+            </a>
+            
+            <a href="{{ url_for('logout') }}" class="nav-item">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-text">로그아웃</span>
+            </a>
+        </nav>
+        
+        <button class="tweet-button" onclick="location.href='{{ url_for('timeline') }}'">
+            <span class="nav-text">트윗하기</span>
+            <span class="nav-icon" style="display: none;">✏️</span>
+        </button>
+    </div>
+    
+    <!-- 중앙 피드 -->
+    <div class="main-feed">
+        <div class="feed-header">
+            환영합니다, {{ user.name }}님!
+        </div>
+        
+        <!-- 프로필 요약 -->
+        <div style="padding: 24px; border-bottom: 8px solid var(--bg-secondary);">
+            <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px;">
+                <div class="avatar" style="width: 72px; height: 72px; font-size: 32px;">
+                    {{ user.name[0] if user.name else 'U' }}
+                </div>
+                <div>
+                    <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 4px;">{{ user.name }}</h2>
+                    <p style="color: var(--text-secondary); font-size: 15px;">@{{ user.username }}</p>
+                    {% if user.profile %}
+                    <p style="margin-top: 8px; font-size: 15px;">{{ user.profile }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 24px; color: var(--text-secondary); font-size: 14px;">
+                <div>
+                    <strong style="color: var(--text-primary);">{{ user.following.count() }}</strong> 팔로잉
+                </div>
+                <div>
+                    <strong style="color: var(--text-primary);">{{ user.followers.count() }}</strong> 팔로워
+                </div>
+            </div>
+        </div>
+        
+        <!-- 빠른 액세스 메뉴 -->
+        <div style="padding: 20px; border-bottom: 8px solid var(--bg-secondary);">
+            <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 16px;">빠른 액세스</h3>
+            
+            <div style="display: grid; gap: 12px;">
+                <a href="{{ url_for('timeline') }}" style="padding: 16px; background: var(--bg-secondary); border-radius: 12px; text-decoration: none; color: var(--text-primary); display: flex; align-items: center; gap: 12px; transition: background 0.2s;">
+                    <span style="font-size: 24px;">📝</span>
+                    <div>
+                        <div style="font-weight: bold;">타임라인</div>
+                        <div style="color: var(--text-secondary); font-size: 13px;">최신 트윗 확인하기</div>
+                    </div>
+                </a>
+                
+                <a href="{{ url_for('users_list') }}" style="padding: 16px; background: var(--bg-secondary); border-radius: 12px; text-decoration: none; color: var(--text-primary); display: flex; align-items: center; gap: 12px; transition: background 0.2s;">
+                    <span style="font-size: 24px;">👥</span>
+                    <div>
+                        <div style="font-weight: bold;">사용자 찾기</div>
+                        <div style="color: var(--text-secondary); font-size: 13px;">새로운 사람들을 팔로우하세요</div>
+                    </div>
+                </a>
+                
+                <a href="{{ url_for('profile') }}" style="padding: 16px; background: var(--bg-secondary); border-radius: 12px; text-decoration: none; color: var(--text-primary); display: flex; align-items: center; gap: 12px; transition: background 0.2s;">
+                    <span style="font-size: 24px;">⚙️</span>
+                    <div>
+                        <div style="font-weight: bold;">프로필 설정</div>
+                        <div style="color: var(--text-secondary); font-size: 13px;">내 정보 수정하기</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        <!-- 계정 정보 -->
+        <div style="padding: 20px;">
+            <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 16px;">계정 정보</h3>
+            
+            <div style="display: grid; gap: 12px;">
+                <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 4px;">이메일</div>
+                    <div style="font-weight: 500;">{{ user.email }}</div>
+                </div>
+                
+                <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 4px;">가입일</div>
+                    <div style="font-weight: 500;">{{ user.created_at.strftime('%Y년 %m월 %d일') }}</div>
+                </div>
+                
+                <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 4px;">계정 상태</div>
+                    <div style="font-weight: 500; color: #10b981;">● 활성화</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 오른쪽 사이드바 -->
+    <div class="right-sidebar">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Twitter 검색">
+        </div>
+        
+        <div class="widget">
+            <div class="widget-header">
+                시작하기
+            </div>
+            <div class="widget-item">
+                <p style="margin-bottom: 12px;">Twitter를 더 잘 활용하는 방법</p>
+                <ul style="list-style: none; padding: 0; color: var(--text-secondary); font-size: 14px;">
+                    <li style="padding: 8px 0;">✓ 관심사에 맞는 사람들을 팔로우하세요</li>
+                    <li style="padding: 8px 0;">✓ 첫 트윗을 작성해보세요</li>
+                    <li style="padding: 8px 0;">✓ 프로필을 완성하세요</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="widget">
+            <div class="widget-header">
+                통계
+            </div>
+            <div class="widget-item">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="color: var(--text-secondary);">트윗</span>
+                    <strong>{{ user.tweets.count() }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="color: var(--text-secondary);">팔로잉</span>
+                    <strong>{{ user.following.count() }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-secondary);">팔로워</span>
+                    <strong>{{ user.followers.count() }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    a[href="{{ url_for('timeline') }}"] {
+        transition: background 0.2s;
+    }
+    
+    a[href="{{ url_for('timeline') }}"]:hover,
+    a[href="{{ url_for('users_list') }}"]:hover,
+    a[href="{{ url_for('profile') }}"]:hover {
+        background: var(--hover-bg) !important;
+    }
+</style>
+{% endblock %}

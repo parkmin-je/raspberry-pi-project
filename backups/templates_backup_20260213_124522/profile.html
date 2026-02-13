@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}프로필 - NexusApp{% endblock %}
+
+{% block content %}
+<nav class="main-nav">
+    <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <span>NexusApp</span>
+    </div>
+    <div style="display: flex; gap: 12px;">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary" style="padding: 10px 20px;">
+            🏠 홈
+        </a>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary" style="padding: 10px 20px;">
+            로그아웃
+        </a>
+    </div>
+</nav>
+
+<div style="max-width: 900px; margin: 0 auto;">
+    <!-- 프로필 헤더 -->
+    <div class="glass-card" style="text-align: center; margin-bottom: 40px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%); position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -50%; left: 50%; transform: translateX(-50%); width: 400px; height: 400px; background: radial-gradient(circle, rgba(99, 102, 241, 0.3), transparent); border-radius: 50%; filter: blur(80px);"></div>
+        
+        <div style="position: relative; z-index: 1;">
+            <div style="width: 120px; height: 120px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 900; color: white; margin: 0 auto 24px; box-shadow: 0 20px 60px rgba(99, 102, 241, 0.4); border: 4px solid rgba(255, 255, 255, 0.2);">
+                {{ user.username[0].upper() }}
+            </div>
+            <h1 style="font-size: 36px; font-weight: 800; margin-bottom: 8px;">{{ user.username }}</h1>
+            <p style="color: var(--text-secondary); font-size: 16px; margin-bottom: 20px;">{{ user.email }}</p>
+            
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 50px; padding: 8px 20px;">
+                <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
+                <span style="color: var(--text-secondary); font-size: 14px; font-weight: 600;">활성 계정</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 정보 섹션 -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 40px;">
+        <div class="glass-card">
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                    👤
+                </div>
+                <h3 style="font-size: 20px; font-weight: 700;">계정 정보</h3>
+            </div>
+            
+            <div style="space-y: 16px;">
+                <div style="margin-bottom: 16px;">
+                    <p style="color: var(--text-secondary); font-size: 13px; font-weight: 600; margin-bottom: 6px;">아이디</p>
+                    <p style="font-size: 16px; font-weight: 600; color: var(--text-primary);">{{ user.username }}</p>
+                </div>
+                
+                <div style="margin-bottom: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                    <p style="color: var(--text-secondary); font-size: 13px; font-weight: 600; margin-bottom: 6px;">이메일</p>
+                    <p style="font-size: 16px; font-weight: 600; color: var(--text-primary); word-break: break-all;">{{ user.email }}</p>
+                </div>
+                
+                <div style="padding-top: 16px; border-top: 1px solid var(--border-color);">
+                    <p style="color: var(--text-secondary); font-size: 13px; font-weight: 600; margin-bottom: 6px;">가입일</p>
+                    <p style="font-size: 16px; font-weight: 600; color: var(--text-primary);">{{ user.created_at.strftime('%Y년 %m월 %d일') }}</p>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">{{ user.created_at.strftime('%H:%M:%S') }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="glass-card">
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #8b5cf6, #d946ef); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                    ⭐
+                </div>
+                <h3 style="font-size: 20px; font-weight: 700;">멤버십</h3>
+            </div>
+            
+            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.1)); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                <p style="font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #f59e0b, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;">
+                    Pro Plan
+                </p>
+                <p style="color: var(--text-secondary); font-size: 13px;">무제한 기능 이용 가능</p>
+            </div>
+            
+            <div style="margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="color: #10b981; font-size: 16px;">✓</span>
+                    <span style="color: var(--text-secondary); font-size: 14px;">무제한 프로젝트</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="color: #10b981; font-size: 16px;">✓</span>
+                    <span style="color: var(--text-secondary); font-size: 14px;">우선 지원</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #10b981; font-size: 16px;">✓</span>
+                    <span style="color: var(--text-secondary); font-size: 14px;">고급 분석</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 보안 섹션 -->
+    <div class="glass-card" style="margin-bottom: 40px;">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                🔐
+            </div>
+            <h3 style="font-size: 20px; font-weight: 700;">보안 설정</h3>
+        </div>
+        
+        <div style="display: grid; gap: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 20px;">🔑</span>
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 4px;">비밀번호</p>
+                        <p style="color: var(--text-secondary); font-size: 13px;">마지막 변경: 최근</p>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;">변경</button>
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 20px;">📱</span>
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 4px;">2단계 인증</p>
+                        <p style="color: var(--text-secondary); font-size: 13px;">추가 보안 레이어</p>
+                    </div>
+                </div>
+                <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                    활성화됨
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 20px;">🌐</span>
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 4px;">활성 세션</p>
+                        <p style="color: var(--text-secondary); font-size: 13px;">1개의 활성 세션</p>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;">관리</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 통계 -->
+    <div class="glass-card" style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(45, 212, 191, 0.1));">
+        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+            <span>📊</span> 활동 통계
+        </h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+            <div style="text-align: center;">
+                <p style="font-size: 36px; font-weight: 800; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;">0</p>
+                <p style="color: var(--text-secondary); font-size: 14px;">프로젝트</p>
+            </div>
+            <div style="text-align: center;">
+                <p style="font-size: 36px; font-weight: 800; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;">1</p>
+                <p style="color: var(--text-secondary); font-size: 14px;">활성 세션</p>
+            </div>
+            <div style="text-align: center;">
+                <p style="font-size: 36px; font-weight: 800; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;">100%</p>
+                <p style="color: var(--text-secondary); font-size: 14px;">보안 점수</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

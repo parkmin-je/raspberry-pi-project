@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Twitter Clone{% endblock %}
+
+{% block content %}
+<style>
+    .landing-page {
+        display: flex;
+        min-height: 100vh;
+    }
+    
+    .landing-left {
+        flex: 1;
+        background: var(--twitter-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .landing-left::before {
+        content: '🐦';
+        font-size: 500px;
+        opacity: 0.1;
+        position: absolute;
+    }
+    
+    .landing-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 40px;
+    }
+    
+    .landing-logo {
+        font-size: 48px;
+        margin-bottom: 48px;
+    }
+    
+    .landing-title {
+        font-size: 64px;
+        font-weight: bold;
+        margin-bottom: 48px;
+        line-height: 1.2;
+    }
+    
+    .landing-subtitle {
+        font-size: 31px;
+        font-weight: bold;
+        margin-bottom: 32px;
+    }
+    
+    .landing-button {
+        width: 100%;
+        max-width: 380px;
+        padding: 12px;
+        border-radius: 9999px;
+        font-size: 17px;
+        font-weight: bold;
+        cursor: pointer;
+        border: 1px solid var(--border-color);
+        margin-bottom: 12px;
+        transition: background 0.2s;
+    }
+    
+    .btn-signup {
+        background: var(--twitter-blue);
+        color: white;
+        border: none;
+    }
+    
+    .btn-signup:hover {
+        background: #1A91DA;
+    }
+    
+    .btn-login {
+        background: transparent;
+        color: var(--twitter-blue);
+    }
+    
+    .btn-login:hover {
+        background: rgba(29, 161, 242, 0.1);
+    }
+    
+    .terms {
+        font-size: 11px;
+        color: var(--text-secondary);
+        max-width: 380px;
+        margin-top: 8px;
+        line-height: 1.5;
+    }
+    
+    .terms a {
+        color: var(--twitter-blue);
+        text-decoration: none;
+    }
+    
+    @media (max-width: 1024px) {
+        .landing-left {
+            display: none;
+        }
+        
+        .landing-right {
+            padding: 20px;
+        }
+        
+        .landing-title {
+            font-size: 48px;
+        }
+    }
+</style>
+
+<div class="landing-page">
+    <div class="landing-left">
+        <div style="font-size: 400px; color: white;">🐦</div>
+    </div>
+    
+    <div class="landing-right">
+        <div class="landing-logo">🐦</div>
+        
+        <h1 class="landing-title">지금 일어나고<br>있는 일</h1>
+        
+        <h2 class="landing-subtitle">오늘 Twitter에 가입하세요.</h2>
+        
+        <button class="landing-button btn-signup" onclick="location.href='{{ url_for('register') }}'">
+            계정 만들기
+        </button>
+        
+        <div class="terms">
+            가입하시려면 <a href="#">쿠키 사용</a>을 포함해 <a href="#">이용약관</a>과 <a href="#">개인정보 처리방침</a>에 동의해야 합니다.
+        </div>
+        
+        <div style="margin-top: 60px;">
+            <p style="font-size: 17px; font-weight: bold; margin-bottom: 20px;">이미 Twitter에 가입하셨나요?</p>
+            <button class="landing-button btn-login" onclick="location.href='{{ url_for('login') }}'">
+                로그인
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

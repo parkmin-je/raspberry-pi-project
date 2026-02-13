@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+
+{% block title %}홈 / Twitter{% endblock %}
+
+{% block content %}
+<div class="twitter-container">
+    <!-- 왼쪽 사이드바 -->
+    <div class="left-sidebar">
+        <a href="{{ url_for('timeline') }}" class="logo">
+            🐦
+        </a>
+        
+        <nav>
+            <a href="{{ url_for('timeline') }}" class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">홈</span>
+            </a>
+            
+            <a href="{{ url_for('explore') }}" class="nav-item">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-text">탐색하기</span>
+            </a>
+            
+            <a href="{{ url_for('notifications') }}" class="nav-item">
+                <span class="nav-icon">🔔</span>
+                <span class="nav-text">알림</span>
+                {% if user.unread_notifications_count() > 0 %}
+                <span style="background: var(--twitter-blue); color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; margin-left: 8px;">
+                    {{ user.unread_notifications_count() }}
+                </span>
+                {% endif %}
+            </a>
+            
+            <a href="{{ url_for('messages') }}" class="nav-item">
+                <span class="nav-icon">✉️</span>
+                <span class="nav-text">쪽지</span>
+                {% if user.unread_messages_count() > 0 %}
+                <span style="background: var(--twitter-blue); color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; margin-left: 8px;">
+                    {{ user.unread_messages_count() }}
+                </span>
+                {% endif %}
+            </a>
+            
+            <a href="{{ url_for('bookmarks') }}" class="nav-item">
+                <span class="nav-icon">🔖</span>
+                <span class="nav-text">북마크</span>
+            </a>
+            
+            <a href="{{ url_for('users_list') }}" class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span class="nav-text">사용자</span>
+            </a>
+            
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">프로필</span>
+            </a>
+            
+            <a href="{{ url_for('logout') }}" class="nav-item">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-text">로그아웃</span>
+            </a>
+        </nav>
+        
+        <button class="tweet-button" onclick="document.getElementById('tweetTextarea').focus()">
+            <span class="nav-text">트윗하기</span>
+            <span class="nav-icon" style="display: none;">✏️</span>
+        </button>
+    </div>
+    
+    <!-- 중앙 피드 -->
+    <div class="main-feed">
+        <div class="feed-header">
+            홈
+        </div>
+        
+        <!-- 트윗 작성 -->
+        <div class="tweet-compose">
+            <div class="compose-wrapper">
+                <div class="avatar">
+                    {{ user.name[0] if user.name else 'U' }}
+                </div>
+                
+                <div class="compose-input">
+                    <textarea 
+                        id="tweetTextarea"
+                        class="compose-textarea" 
+                        placeholder="무슨 일이 일어나고 있나요?"
+                        maxlength="300"
+                    ></textarea>
+                    
+                    <div class="compose-actions">
+                        <div class="compose-icons">
+                            <button class="icon-button" title="이미지">📷</button>
+                            <button class="icon-button" title="GIF">🎬</button>
+                            <button class="icon-button" title="이모지">😊</button>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <span id="charCount" style="color: var(--text-secondary); font-size: 13px;">0 / 300</span>
+                            <button class="post-button" id="postButton" disabled>트윗하기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 타임라인 -->
+        <div id="timeline">
+            {% if tweets %}
+                {% for tweet in tweets %}
+                <div class="tweet-card" data-tweet-id="{{ tweet.id }}">
+                    <div class="tweet-content-wrapper">
+                        <div class="avatar">
+                            {{ tweet.author.name[0] if tweet.author.name else 'U' }}
+                        </div>
+                        
+                        <div class="tweet-body">
+                            <div class="tweet-header">
+                                <span class="tweet-author">{{ tweet.author.name }}</span>
+                                <span class="tweet-username">@{{ tweet.author.username }}</span>
+                                <span class="tweet-dot">·</span>
+                                <span class="tweet-time">{{ tweet.created_at.strftime('%m월 %d일') }}</span>
+                            </div>
+                            
+                            <div class="tweet-text">
+                                {{ tweet.content }}
+                            </div>
+                            
+                            <div class="tweet-actions">
+                                <button class="action-button reply" onclick="showReplyModal({{ tweet.id }}, '{{ tweet.author.name }}', '{{ tweet.content[:50] }}')">
+                                    <span class="icon">💬</span>
+                                    <span class="count">{{ tweet.replies_count() }}</span>
+                                </button>
+                                
+                                <button class="action-button retweet {% if tweet.is_retweeted_by(user) %}active{% endif %}" onclick="toggleRetweet({{ tweet.id }}, this)">
+                                    <span class="icon">🔁</span>
+                                    <span class="count">{{ tweet.retweets_count() }}</span>
+                                </button>
+                                
+                                <button class="action-button like {% if tweet.is_liked_by(user) %}active{% endif %}" onclick="toggleLike({{ tweet.id }}, this)">
+                                    <span class="icon">{% if tweet.is_liked_by(user) %}❤️{% else %}🤍{% endif %}</span>
+                                    <span class="count">{{ tweet.likes_count() }}</span>
+                                </button>
+                                
+                                <button class="action-button bookmark {% if tweet.is_bookmarked_by(user) %}active{% endif %}" onclick="toggleBookmark({{ tweet.id }}, this)">
+                                    <span class="icon">{% if tweet.is_bookmarked_by(user) %}🔖{% else %}📑{% endif %}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🐦</div>
+                    <h3 style="margin-bottom: 8px;">타임라인이 비어있습니다</h3>
+                    <p>첫 트윗을 작성하거나 다른 사용자를 팔로우해보세요!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- 오른쪽 사이드바 -->
+    <div class="right-sidebar">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Twitter 검색">
+        </div>
+        
+        <div class="widget">
+            <div class="widget-header">
+                나를 위한 트렌드
+            </div>
+            <div class="widget-item">
+                <div style="color: var(--text-secondary); font-size: 13px;">대한민국에서 트렌드</div>
+                <div style="font-weight: bold; margin: 4px 0;">#Flask</div>
+                <div style="color: var(--text-secondary); font-size: 13px;">1,234 트윗</div>
+            </div>
+            <div class="widget-item">
+                <div style="color: var(--text-secondary); font-size: 13px;">기술 · 트렌딩</div>
+                <div style="font-weight: bold; margin: 4px 0;">#Python</div>
+                <div style="color: var(--text-secondary); font-size: 13px;">5,678 트윗</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 답글 모달 -->
+<div id="replyModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 16px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+        <div style="padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <button onclick="closeReplyModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; padding: 8px; border-radius: 50%;">✕</button>
+            <h3 style="font-size: 20px; font-weight: bold;">답글 작성</h3>
+            <div style="width: 36px;"></div>
+        </div>
+        
+        <div style="padding: 16px;">
+            <div id="originalTweet" style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color); margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;"></div>
+            
+            <div style="display: flex; gap: 12px;">
+                <div class="avatar">{{ user.name[0] if user.name else 'U' }}</div>
+                <div style="flex: 1;">
+                    <textarea id="replyTextarea" placeholder="답글 트윗하기" style="width: 100%; border: none; outline: none; font-size: 17px; font-family: inherit; resize: none; min-height: 100px;" maxlength="300"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div style="padding: 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end;">
+            <button id="replyButton" class="post-button" onclick="submitReply()">답글</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.action-button.active.like {
+    color: #F91880;
+}
+
+.action-button.active.like .icon {
+    color: #F91880;
+}
+
+.action-button.active.retweet {
+    color: #17BF63;
+}
+
+.action-button.active.retweet .icon {
+    color: #17BF63;
+}
+
+.action-button.active.bookmark {
+    color: var(--twitter-blue);
+}
+</style>
+
+<script>
+const textarea = document.getElementById('tweetTextarea');
+const postButton = document.getElementById('postButton');
+const charCount = document.getElementById('charCount');
+let currentReplyTweetId = null;
+
+// 글자 수 카운트
+textarea.addEventListener('input', () => {
+    const length = textarea.value.length;
+    charCount.textContent = `${length} / 300`;
+    postButton.disabled = length === 0 || length > 300;
+    
+    if (length > 300) {
+        charCount.style.color = '#F91880';
+    } else {
+        charCount.style.color = 'var(--text-secondary)';
+    }
+});
+
+// 트윗 작성
+postButton.addEventListener('click', async () => {
+    const content = textarea.value.trim();
+    if (!content) return;
+    
+    postButton.disabled = true;
+    postButton.textContent = '게시 중...';
+    
+    try {
+        const response = await fetch('/api/tweet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content })
+        });
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            const data = await response.json();
+            alert(data.error || '트윗 작성에 실패했습니다');
+            postButton.disabled = false;
+            postButton.textContent = '트윗하기';
+        }
+    } catch (error) {
+        alert('오류가 발생했습니다');
+        postButton.disabled = false;
+        postButton.textContent = '트윗하기';
+    }
+});
+
+// Enter키로 트윗
+textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (!postButton.disabled) {
+            postButton.click();
+        }
+    }
+});
+
+// 좋아요 토글
+async function toggleLike(tweetId, button) {
+    button.disabled = true;
+    
+    try {
+        const response = await fetch(`/api/like/${tweetId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const icon = button.querySelector('.icon');
+            const count = button.querySelector('.count');
+            
+            if (data.action === 'liked') {
+                icon.textContent = '❤️';
+                button.classList.add('active');
+            } else {
+                icon.textContent = '🤍';
+                button.classList.remove('active');
+            }
+            
+            count.textContent = data.count;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        button.disabled = false;
+    }
+}
+
+// 리트윗 토글
+async function toggleRetweet(tweetId, button) {
+    button.disabled = true;
+    
+    try {
+        const response = await fetch(`/api/retweet/${tweetId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const count = button.querySelector('.count');
+            
+            if (data.action === 'retweeted') {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+            
+            count.textContent = data.count;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        button.disabled = false;
+    }
+}
+
+// 북마크 토글
+async function toggleBookmark(tweetId, button) {
+    button.disabled = true;
+    
+    try {
+        const response = await fetch(`/api/bookmark/${tweetId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const icon = button.querySelector('.icon');
+            
+            if (data.action === 'bookmarked') {
+                icon.textContent = '🔖';
+                button.classList.add('active');
+            } else {
+                icon.textContent = '📑';
+                button.classList.remove('active');
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        button.disabled = false;
+    }
+}
+
+// 답글 모달 열기
+function showReplyModal(tweetId, authorName, content) {
+    currentReplyTweetId = tweetId;
+    document.getElementById('originalTweet').innerHTML = `
+        <strong>${authorName}</strong>님에게 보내는 답글<br>
+        <span style="color: var(--text-primary); margin-top: 8px; display: block;">${content}${content.length > 50 ? '...' : ''}</span>
+    `;
+    document.getElementById('replyModal').style.display = 'flex';
+    document.getElementById('replyTextarea').focus();
+}
+
+// 답글 모달 닫기
+function closeReplyModal() {
+    document.getElementById('replyModal').style.display = 'none';
+    document.getElementById('replyTextarea').value = '';
+    currentReplyTweetId = null;
+}
+
+// 답글 제출
+async function submitReply() {
+    const content = document.getElementById('replyTextarea').value.trim();
+    if (!content) return;
+    
+    const button = document.getElementById('replyButton');
+    button.disabled = true;
+    button.textContent = '답글 중...';
+    
+    try {
+        const response = await fetch(`/api/reply/${currentReplyTweetId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content })
+        });
+        
+        if (response.ok) {
+            closeReplyModal();
+            location.reload();
+        } else {
+            const data = await response.json();
+            alert(data.error || '답글 작성에 실패했습니다');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('오류가 발생했습니다');
+    } finally {
+        button.disabled = false;
+        button.textContent = '답글';
+    }
+}
+
+// ESC키로 모달 닫기
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeReplyModal();
+    }
+});
+
+// 모달 배경 클릭 시 닫기
+document.getElementById('replyModal').addEventListener('click', (e) => {
+    if (e.target.id === 'replyModal') {
+        closeReplyModal();
+    }
+});
+</script>
+{% endblock %}

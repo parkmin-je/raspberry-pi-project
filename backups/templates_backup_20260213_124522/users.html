@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}사용자 목록 - NexusApp{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2>사용자 목록</h2>
+    
+    <div>
+        {% for profile_user in all_users %}
+        <div class="glass-card" style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>{{ profile_user.name }}</strong>
+                    <span style="color: var(--text-secondary); margin-left: 8px;">@{{ profile_user.username }}</span>
+                    {% if profile_user.profile %}
+                    <p style="margin: 8px 0 0 0; color: var(--text-secondary); font-size: 14px;">{{ profile_user.profile }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if user.is_following(profile_user) %}
+                    <button class="btn" onclick="unfollowUser({{ profile_user.id }})">언팔로우</button>
+                    {% else %}
+                    <button class="btn btn-primary" onclick="followUser({{ profile_user.id }})">팔로우</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+async function followUser(userId) {
+    try {
+        const response = await fetch(`/api/follow/${userId}`, { method: 'POST' });
+        if (response.ok) {
+            location.reload();
+        }
+    } catch (error) {
+        alert('팔로우 실패');
+    }
+}
+
+async function unfollowUser(userId) {
+    try {
+        const response = await fetch(`/api/unfollow/${userId}`, { method: 'POST' });
+        if (response.ok) {
+            location.reload();
+        }
+    } catch (error) {
+        alert('언팔로우 실패');
+    }
+}
+</script>
+{% endblock %}

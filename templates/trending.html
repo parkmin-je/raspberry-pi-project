@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}트렌드 / Twitter{% endblock %}
+
+{% block content %}
+<div class="twitter-container">
+    <!-- 왼쪽 사이드바 -->
+    <div class="left-sidebar">
+        <a href="{{ url_for('timeline') }}" class="logo">
+            🐦
+        </a>
+        
+        <nav>
+            <a href="{{ url_for('timeline') }}" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">홈</span>
+            </a>
+            
+            <a href="{{ url_for('explore') }}" class="nav-item">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-text">탐색하기</span>
+            </a>
+            
+            <a href="{{ url_for('trending') }}" class="nav-item active">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">트렌드</span>
+            </a>
+            
+            <a href="{{ url_for('notifications') }}" class="nav-item">
+                <span class="nav-icon">🔔</span>
+                <span class="nav-text">알림</span>
+                {% if user.unread_notifications_count() > 0 %}
+                <span style="background: var(--twitter-blue); color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; margin-left: 8px;">
+                    {{ user.unread_notifications_count() }}
+                </span>
+                {% endif %}
+            </a>
+            
+            <a href="{{ url_for('messages') }}" class="nav-item">
+                <span class="nav-icon">✉️</span>
+                <span class="nav-text">쪽지</span>
+                {% if user.unread_messages_count() > 0 %}
+                <span style="background: var(--twitter-blue); color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; margin-left: 8px;">
+                    {{ user.unread_messages_count() }}
+                </span>
+                {% endif %}
+            </a>
+            
+            <a href="{{ url_for('bookmarks') }}" class="nav-item">
+                <span class="nav-icon">🔖</span>
+                <span class="nav-text">북마크</span>
+            </a>
+            
+            <a href="{{ url_for('users_list') }}" class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span class="nav-text">사용자</span>
+            </a>
+            
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">프로필</span>
+            </a>
+            
+            <a href="{{ url_for('logout') }}" class="nav-item">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-text">로그아웃</span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- 중앙 피드 -->
+    <div class="main-feed">
+        <div class="feed-header">
+            <div style="font-size: 20px; font-weight: bold;">트렌드</div>
+        </div>
+        
+        <!-- 트렌드 헤더 -->
+        <div style="padding: 20px; border-bottom: 1px solid var(--border-color); background: linear-gradient(135deg, var(--twitter-blue) 0%, #1a8cd8 100%); color: white;">
+            <div style="font-size: 32px; font-weight: bold; margin-bottom: 8px;">📊 트렌딩 해시태그</div>
+            <div style="font-size: 15px; opacity: 0.9;">
+                지금 가장 인기 있는 해시태그를 확인하세요
+            </div>
+        </div>
+        
+        <!-- 트렌딩 해시태그 목록 -->
+        <div id="trending-list">
+            {% if trending_tags %}
+                {% for hashtag in trending_tags %}
+                <a href="{{ url_for('hashtag_page', tag=hashtag.tag) }}" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="widget-item" style="border-bottom: 1px solid var(--border-color); padding: 16px 20px; transition: background 0.2s;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 2px;">
+                                    {{ loop.index }}위 · 트렌딩
+                                </div>
+                                <div style="font-weight: bold; font-size: 17px; margin: 4px 0; color: var(--text-primary);">
+                                    #{{ hashtag.tag }}
+                                </div>
+                                <div style="color: var(--text-secondary); font-size: 13px;">
+                                    {{ hashtag.tweet_count() }} 트윗
+                                </div>
+                            </div>
+                            <div style="font-size: 32px; opacity: 0.3; margin-left: 16px;">
+                                {% if loop.index == 1 %}🥇
+                                {% elif loop.index == 2 %}🥈
+                                {% elif loop.index == 3 %}🥉
+                                {% else %}📌
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                    <h3 style="margin-bottom: 8px;">아직 트렌드가 없습니다</h3>
+                    <p>해시태그를 사용해서 트윗을 작성해보세요!</p>
+                    <p style="margin-top: 12px; font-size: 14px;">
+                        예: "오늘 #파이썬 공부했어요! #Flask는 재밌네요"
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- 트렌드 사용 팁 -->
+        {% if trending_tags %}
+        <div style="padding: 20px; border-top: 2px solid var(--border-color); background: var(--background-secondary); margin-top: 20px;">
+            <h3 style="font-size: 17px; font-weight: bold; margin-bottom: 12px;">💡 해시태그 사용 팁</h3>
+            <ul style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; padding-left: 20px;">
+                <li>관련 주제에 대해 이야기할 때 해시태그를 사용하세요</li>
+                <li>너무 많은 해시태그는 오히려 역효과! 2-3개가 적당합니다</li>
+                <li>해시태그는 한글, 영문, 숫자를 모두 지원합니다</li>
+                <li>인기 해시태그를 활용하면 더 많은 사람들에게 노출됩니다</li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- 오른쪽 사이드바 -->
+    <div class="right-sidebar">
+        <div class="search-box">
+            <form action="{{ url_for('search') }}" method="GET">
+                <input type="text" name="q" class="search-input" placeholder="해시태그 검색" value="">
+            </form>
+        </div>
+        
+        <div class="widget">
+            <div class="widget-header">
+                통계
+            </div>
+            <div style="padding: 16px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="color: var(--text-secondary);">총 해시태그</span>
+                    <span style="font-weight: bold;">{{ trending_tags|length }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-secondary);">총 트윗 수</span>
+                    <span style="font-weight: bold;">{{ trending_tags|sum(attribute='tweet_count')|default(0) }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="widget">
+            <div class="widget-header">
+                빠른 링크
+            </div>
+            <a href="{{ url_for('explore') }}" style="color: var(--text-primary); text-decoration: none; padding: 16px; display: block; border-bottom: 1px solid var(--border-color);">
+                🔍 탐색하기
+            </a>
+            <a href="{{ url_for('timeline') }}" style="color: var(--text-primary); text-decoration: none; padding: 16px; display: block;">
+                🏠 타임라인으로
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.widget-item:hover {
+    background: var(--background-secondary);
+}
+
+/* 순위 배지 스타일 */
+.trending-badge {
+    display: inline-block;
+    background: var(--twitter-blue);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-left: 8px;
+}
+
+/* 트렌드 카드 호버 효과 */
+.widget-item {
+    cursor: pointer;
+}
+
+/* 상위 3개 강조 */
+.widget-item:nth-child(1) {
+    background: linear-gradient(to right, rgba(255, 215, 0, 0.05), transparent);
+}
+
+.widget-item:nth-child(2) {
+    background: linear-gradient(to right, rgba(192, 192, 192, 0.05), transparent);
+}
+
+.widget-item:nth-child(3) {
+    background: linear-gradient(to right, rgba(205, 127, 50, 0.05), transparent);
+}
+</style>
+
+<script>
+// 실시간 트렌드 업데이트 (선택사항)
+async function refreshTrends() {
+    try {
+        const response = await fetch('/api/hashtags/trending?limit=20');
+        if (response.ok) {
+            const data = await response.json();
+            console.log('트렌드 업데이트:', data.hashtags);
+            // 필요시 UI 업데이트 로직 추가
+        }
+    } catch (error) {
+        console.error('트렌드 업데이트 오류:', error);
+    }
+}
+
+// 5분마다 자동 새로고침 (선택사항)
+// setInterval(refreshTrends, 5 * 60 * 1000);
+
+// 페이지 로드 시 애니메이션
+document.addEventListener('DOMContentLoaded', () => {
+    const items = document.querySelectorAll('.widget-item');
+    items.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            item.style.transition = 'all 0.3s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+        }, index * 50);
+    });
+});
+</script>
+{% endblock %}

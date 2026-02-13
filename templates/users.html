@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}사용자 찾기 / Twitter{% endblock %}
+
+{% block content %}
+<div class="twitter-container">
+    <!-- 왼쪽 사이드바 -->
+    <div class="left-sidebar">
+        <a href="{{ url_for('timeline') }}" class="logo">
+            🐦
+        </a>
+        
+        <nav>
+            <a href="{{ url_for('timeline') }}" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">홈</span>
+            </a>
+            
+            <a href="{{ url_for('users_list') }}" class="nav-item active">
+                <span class="nav-icon">👥</span>
+                <span class="nav-text">사용자</span>
+            </a>
+            
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">프로필</span>
+            </a>
+            
+            <a href="{{ url_for('logout') }}" class="nav-item">
+                <span class="nav-icon">🚪</span>
+                <span class="nav-text">로그아웃</span>
+            </a>
+        </nav>
+        
+        <button class="tweet-button" onclick="location.href='{{ url_for('timeline') }}'">
+            <span class="nav-text">트윗하기</span>
+            <span class="nav-icon" style="display: none;">✏️</span>
+        </button>
+    </div>
+    
+    <!-- 중앙 피드 -->
+    <div class="main-feed">
+        <div class="feed-header">
+            사용자 찾기
+        </div>
+        
+        <!-- 사용자 목록 -->
+        <div>
+            {% if all_users %}
+                {% for profile_user in all_users %}
+                <div class="tweet-card" style="border-bottom: 1px solid var(--border-color);">
+                    <div class="tweet-content-wrapper">
+                        <div class="avatar">
+                            {{ profile_user.name[0] if profile_user.name else 'U' }}
+                        </div>
+                        
+                        <div class="tweet-body">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1; cursor: pointer;" onclick="location.href='{{ url_for('user_profile', username=profile_user.username) }}'">
+                                    <div class="tweet-author" style="margin-bottom: 2px;">{{ profile_user.name }}</div>
+                                    <div class="tweet-username">@{{ profile_user.username }}</div>
+                                    {% if profile_user.profile %}
+                                    <p style="margin-top: 8px; font-size: 15px; color: var(--text-primary);">{{ profile_user.profile }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    {% if user.is_following(profile_user) %}
+                                    <button class="following-button" onclick="unfollowUser({{ profile_user.id }}, this)" style="padding: 8px 16px; border-radius: 9999px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+                                        팔로잉
+                                    </button>
+                                    {% else %}
+                                    <button class="follow-button" onclick="followUser({{ profile_user.id }}, this)" style="padding: 8px 16px; border-radius: 9999px; font-size: 14px; font-weight: bold; cursor: pointer;">
+                                        팔로우
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">👥</div>
+                    <h3 style="margin-bottom: 8px;">아직 다른 사용자가 없습니다</h3>
+                    <p>곧 새로운 사람들이 가입할 거예요!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- 오른쪽 사이드바 -->
+    <div class="right-sidebar">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="사용자 검색" id="userSearch">
+        </div>
+        
+        <div class="widget">
+            <div class="widget-header">
+                추천 사용자
+            </div>
+            {% if all_users[:3] %}
+                {% for profile_user in all_users[:3] %}
+                <div class="widget-item">
+                    <div class="user-item">
+                        <div class="user-info">
+                            <div class="avatar" style="width: 40px; height: 40px; font-size: 16px;">
+                                {{ profile_user.name[0] if profile_user.name else 'U' }}
+                            </div>
+                            <div>
+                                <div class="user-name">{{ profile_user.name }}</div>
+                                <div style="color: var(--text-secondary); font-size: 14px;">@{{ profile_user.username }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+async function followUser(userId, button) {
+    button.disabled = true;
+    button.textContent = '처리 중...';
+    
+    try {
+        const response = await fetch(`/api/follow/${userId}`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            button.textContent = '팔로잉';
+            button.className = 'following-button';
+            button.onclick = () => unfollowUser(userId, button);
+        } else {
+            alert('팔로우 실패');
+            button.disabled = false;
+            button.textContent = '팔로우';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('오류가 발생했습니다');
+        button.disabled = false;
+        button.textContent = '팔로우';
+    }
+}
+
+async function unfollowUser(userId, button) {
+    button.disabled = true;
+    button.textContent = '처리 중...';
+    
+    try {
+        const response = await fetch(`/api/unfollow/${userId}`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            button.textContent = '팔로우';
+            button.className = 'follow-button';
+            button.onclick = () => followUser(userId, button);
+        } else {
+            alert('언팔로우 실패');
+            button.disabled = false;
+            button.textContent = '팔로잉';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('오류가 발생했습니다');
+        button.disabled = false;
+        button.textContent = '팔로잉';
+    }
+}
+
+// 사용자 검색 필터
+document.getElementById('userSearch').addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const userCards = document.querySelectorAll('.tweet-card');
+    
+    userCards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

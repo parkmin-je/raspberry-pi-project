@@ -1,0 +1,482 @@
+/* 트위터 스타일 CSS */
+:root {
+    --twitter-blue: #1DA1F2;
+    --twitter-dark: #14171A;
+    --text-primary: #14171A;
+    --text-secondary: #657786;
+    --border-color: #E1E8ED;
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F7F9FA;
+    --hover-bg: #F5F8FA;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* 3단 레이아웃 */
+.twitter-container {
+    display: flex;
+    max-width: 1280px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+
+/* 왼쪽 사이드바 */
+.left-sidebar {
+    width: 275px;
+    padding: 0 12px;
+    border-right: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.logo {
+    font-size: 30px;
+    padding: 12px;
+    margin-bottom: 4px;
+    display: inline-block;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.logo:hover {
+    background: var(--hover-bg);
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 16px;
+    margin: 4px 0;
+    border-radius: 9999px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 400;
+    transition: background 0.2s;
+}
+
+.nav-item:hover {
+    background: var(--hover-bg);
+}
+
+.nav-item.active {
+    font-weight: bold;
+}
+
+.nav-icon {
+    font-size: 26px;
+    width: 26px;
+    text-align: center;
+}
+
+.tweet-button {
+    background: var(--twitter-blue);
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    padding: 16px;
+    width: 90%;
+    font-size: 17px;
+    font-weight: bold;
+    margin-top: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.tweet-button:hover {
+    background: #1A91DA;
+}
+
+/* 중앙 피드 */
+.main-feed {
+    flex: 1;
+    max-width: 600px;
+    border-right: 1px solid var(--border-color);
+}
+
+.feed-header {
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px;
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tab {
+    flex: 1;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+    transition: background 0.2s;
+}
+
+.tab:hover {
+    background: var(--hover-bg);
+}
+
+.tab.active {
+    color: var(--text-primary);
+    font-weight: bold;
+    border-bottom-color: var(--twitter-blue);
+}
+
+/* 트윗 작성 박스 */
+.tweet-compose {
+    padding: 16px;
+    border-bottom: 8px solid var(--bg-secondary);
+}
+
+.compose-wrapper {
+    display: flex;
+    gap: 12px;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--twitter-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.compose-input {
+    flex: 1;
+}
+
+.compose-textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 20px;
+    font-family: inherit;
+    resize: none;
+    min-height: 80px;
+    padding: 12px 0;
+}
+
+.compose-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.compose-icons {
+    display: flex;
+    gap: 16px;
+    color: var(--twitter-blue);
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.icon-button:hover {
+    background: rgba(29, 161, 242, 0.1);
+}
+
+.post-button {
+    background: var(--twitter-blue);
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    padding: 8px 20px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.post-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.post-button:not(:disabled):hover {
+    background: #1A91DA;
+}
+
+/* 트윗 카드 */
+.tweet-card {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.tweet-card:hover {
+    background: var(--bg-secondary);
+}
+
+.tweet-content-wrapper {
+    display: flex;
+    gap: 12px;
+}
+
+.tweet-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.tweet-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+
+.tweet-author {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.tweet-author:hover {
+    text-decoration: underline;
+}
+
+.tweet-username {
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.tweet-dot {
+    color: var(--text-secondary);
+}
+
+.tweet-time {
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.tweet-text {
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 4px 0 12px 0;
+    word-wrap: break-word;
+}
+
+.tweet-actions {
+    display: flex;
+    justify-content: space-between;
+    max-width: 425px;
+    margin-top: 12px;
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 9999px;
+    transition: all 0.2s;
+    font-size: 13px;
+}
+
+.action-button .icon {
+    font-size: 18px;
+}
+
+.action-button:hover {
+    color: var(--twitter-blue);
+    background: rgba(29, 161, 242, 0.1);
+}
+
+.action-button.reply:hover {
+    color: var(--twitter-blue);
+    background: rgba(29, 161, 242, 0.1);
+}
+
+.action-button.retweet:hover {
+    color: #17BF63;
+    background: rgba(23, 191, 99, 0.1);
+}
+
+.action-button.like:hover {
+    color: #F91880;
+    background: rgba(249, 24, 128, 0.1);
+}
+
+/* 오른쪽 사이드바 */
+.right-sidebar {
+    width: 350px;
+    padding: 0 16px;
+    margin-left: 32px;
+}
+
+.search-box {
+    position: sticky;
+    top: 0;
+    padding: 4px 0 16px;
+    background: var(--bg-primary);
+    z-index: 10;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    background: var(--bg-secondary);
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.search-input:focus {
+    background: var(--bg-primary);
+    border-color: var(--twitter-blue);
+}
+
+.widget {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.widget-header {
+    padding: 16px;
+    font-size: 20px;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.widget-item {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+}
+
+.widget-item:last-child {
+    border-bottom: none;
+}
+
+.widget-item:hover {
+    background: var(--hover-bg);
+}
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.user-name {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.follow-button {
+    background: var(--text-primary);
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.follow-button:hover {
+    background: #272C30;
+}
+
+.following-button {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.following-button:hover {
+    background: rgba(249, 24, 128, 0.1);
+    border-color: rgba(249, 24, 128, 0.4);
+    color: #F91880;
+}
+
+/* 반응형 */
+@media (max-width: 1280px) {
+    .right-sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 1024px) {
+    .left-sidebar {
+        width: 88px;
+    }
+    
+    .nav-text {
+        display: none;
+    }
+    
+    .tweet-button {
+        width: 50px;
+        height: 50px;
+        padding: 0;
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .left-sidebar {
+        display: none;
+    }
+    
+    .twitter-container {
+        flex-direction: column;
+    }
+    
+    .main-feed {
+        max-width: 100%;
+        border-right: none;
+    }
+}

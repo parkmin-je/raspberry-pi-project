@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}로그인 - NexusApp{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 60px auto;">
+    <div style="text-align: center; margin-bottom: 40px;">
+        <a href="{{ url_for('index') }}" class="logo" style="display: inline-flex; text-decoration: none;">
+            <div class="logo-icon">⚡</div>
+            <span>NexusApp</span>
+        </a>
+    </div>
+    
+    <div class="glass-card">
+        <div style="text-align: center; margin-bottom: 32px;">
+            <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 8px;">다시 오셨군요!</h2>
+            <p style="color: var(--text-secondary); font-size: 15px;">계정에 로그인하여 계속하세요</p>
+        </div>
+        
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.username.label }}
+                {{ form.username(placeholder="아이디를 입력하세요", autocomplete="username") }}
+                {% if form.username.errors %}
+                    {% for error in form.username.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(placeholder="비밀번호를 입력하세요", autocomplete="current-password") }}
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 16px; margin-top: 8px;">
+                로그인
+            </button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+            <p style="color: var(--text-secondary); font-size: 14px;">
+                계정이 없으신가요? 
+                <a href="{{ url_for('register') }}" style="color: #6366f1; text-decoration: none; font-weight: 600; margin-left: 4px;">
+                    회원가입 →
+                </a>
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 24px;">
+        <a href="{{ url_for('index') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: color 0.3s;">
+            ← 홈으로 돌아가기
+        </a>
+    </div>
+</div>
+{% endblock %}
