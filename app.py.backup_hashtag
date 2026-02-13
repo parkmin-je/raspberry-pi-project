@@ -99,11 +99,6 @@ class Tweet(db.Model):
     
     def is_bookmarked_by(self, user):
         return Bookmark.query.filter_by(user_id=user.id, tweet_id=self.id).first() is not None
-    
-    def get_hashtags(self):
-        """트윗의 해시태그 목록 반환"""
-        tweet_hashtags = TweetHashtag.query.filter_by(tweet_id=self.id).all()
-        return [Hashtag.query.get(th.hashtag_id) for th in tweet_hashtags]
 
 class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -160,40 +155,6 @@ class Bookmark(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     __table_args__ = (db.UniqueConstraint('user_id', 'tweet_id', name='unique_bookmark'),)
-
-# ====== 새로운 해시태그 모델 추가 ======
-class Hashtag(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    tag = db.Column(db.String(100), unique=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def tweet_count(self):
-        """이 해시태그를 사용한 트윗 개수"""
-        return TweetHashtag.query.filter_by(hashtag_id=self.id).count()
-    
-    def get_tweets(self):
-        """이 해시태그를 포함한 트윗들"""
-        tweet_hashtags = TweetHashtag.query.filter_by(hashtag_id=self.id).all()
-        return [Tweet.query.get(th.tweet_id) for th in tweet_hashtags]
-
-class TweetHashtag(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    tweet_id = db.Column(db.Integer, db.ForeignKey('tweet.id'), nullable=False)
-    hashtag_id = db.Column(db.Integer, db.ForeignKey('hashtag.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    __table_args__ = (db.UniqueConstraint('tweet_id', 'hashtag_id', name='unique_tweet_hashtag'),)
-
-# ====== 해시태그 추출 함수 ======
-def extract_hashtags(text):
-    """
-    텍스트에서 해시태그 추출
-    예: "오늘 #파이썬 공부했어요! #Flask는 재밌어요" -> ['파이썬', 'Flask는']
-    """
-    # 정규식으로 # 뒤의 단어 추출 (한글, 영문, 숫자, 언더스코어)
-    hashtag_pattern = r'#([가-힣a-zA-Z0-9_]+)'
-    hashtags = re.findall(hashtag_pattern, text)
-    return hashtags
 
 # 폼 검증
 class RegisterForm(FlaskForm):
@@ -418,63 +379,6 @@ def explore():
     
     return render_template('explore.html', user=user, tweets=tweets)
 
-# ====== 새로운 해시태그 관련 라우트 ======
-@app.route('/hashtag/<tag>')
-def hashtag_page(tag):
-    """특정 해시태그를 포함한 트윗 보기"""
-    if 'user_id' not in session:
-        flash('로그인이 필요합니다.', 'error')
-        return redirect(url_for('login'))
-    
-    user = User.query.get(session['user_id'])
-    hashtag = Hashtag.query.filter_by(tag=tag).first()
-    
-    if not hashtag:
-        flash(f'#{tag} 해시태그를 찾을 수 없습니다.', 'error')
-        return redirect(url_for('explore'))
-    
-    # 해시태그가 포함된 트윗들
-    tweet_hashtags = TweetHashtag.query.filter_by(hashtag_id=hashtag.id).order_by(TweetHashtag.created_at.desc()).all()
-    tweets = [Tweet.query.get(th.tweet_id) for th in tweet_hashtags]
-    
-    return render_template('hashtag.html', user=user, hashtag=hashtag, tweets=tweets)
-
-@app.route('/trending')
-def trending():
-    """트렌딩 해시태그 페이지"""
-    if 'user_id' not in session:
-        flash('로그인이 필요합니다.', 'error')
-        return redirect(url_for('login'))
-    
-    user = User.query.get(session['user_id'])
-    
-    # 모든 해시태그를 트윗 개수별로 정렬
-    all_hashtags = Hashtag.query.all()
-    trending_tags = sorted(all_hashtags, key=lambda h: h.tweet_count(), reverse=True)[:20]
-    
-    return render_template('trending.html', user=user, trending_tags=trending_tags)
-
-@app.route('/search')
-def search():
-    """트윗 및 해시태그 검색"""
-    if 'user_id' not in session:
-        flash('로그인이 필요합니다.', 'error')
-        return redirect(url_for('login'))
-    
-    user = User.query.get(session['user_id'])
-    query = request.args.get('q', '').strip()
-    
-    if not query:
-        return render_template('search.html', user=user, query='', tweets=[], hashtags=[])
-    
-    # 트윗 검색 (내용에 검색어 포함)
-    tweets = Tweet.query.filter(Tweet.content.contains(query)).order_by(Tweet.created_at.desc()).limit(50).all()
-    
-    # 해시태그 검색
-    hashtags = Hashtag.query.filter(Hashtag.tag.contains(query)).limit(10).all()
-    
-    return render_template('search.html', user=user, query=query, tweets=tweets, hashtags=hashtags)
-
 @app.route('/logout')
 def logout():
     session.clear()
@@ -496,28 +400,8 @@ def api_tweet():
     if len(content) > 300:
         return jsonify({'error': 'Tweet exceeds 300 characters'}), 400
     
-    # 트윗 생성
     tweet = Tweet(content=content, user_id=session['user_id'])
     db.session.add(tweet)
-    db.session.commit()
-    
-    # ====== 해시태그 추출 및 저장 ======
-    hashtags = extract_hashtags(content)
-    for tag in hashtags:
-        # 해시태그가 이미 존재하는지 확인
-        hashtag = Hashtag.query.filter_by(tag=tag).first()
-        if not hashtag:
-            # 새로운 해시태그 생성
-            hashtag = Hashtag(tag=tag)
-            db.session.add(hashtag)
-            db.session.commit()
-        
-        # 트윗-해시태그 연결 (중복 방지)
-        existing = TweetHashtag.query.filter_by(tweet_id=tweet.id, hashtag_id=hashtag.id).first()
-        if not existing:
-            tweet_hashtag = TweetHashtag(tweet_id=tweet.id, hashtag_id=hashtag.id)
-            db.session.add(tweet_hashtag)
-    
     db.session.commit()
     
     return jsonify({
@@ -525,8 +409,7 @@ def api_tweet():
         'tweet': {
             'id': tweet.id,
             'content': tweet.content,
-            'created_at': tweet.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'hashtags': hashtags
+            'created_at': tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')
         }
     }), 201
 
@@ -726,50 +609,6 @@ def api_timeline():
             'content': tweet.content,
             'author': tweet.author.username,
             'author_name': tweet.author.name,
-            'created_at': tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')
-        } for tweet in tweets]
-    }), 200
-
-# ====== 새로운 해시태그 API ======
-@app.route('/api/hashtags/trending', methods=['GET'])
-def api_trending_hashtags():
-    """트렌딩 해시태그 API"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    limit = request.args.get('limit', 10, type=int)
-    
-    all_hashtags = Hashtag.query.all()
-    trending = sorted(all_hashtags, key=lambda h: h.tweet_count(), reverse=True)[:limit]
-    
-    return jsonify({
-        'hashtags': [{
-            'tag': h.tag,
-            'tweet_count': h.tweet_count()
-        } for h in trending]
-    }), 200
-
-@app.route('/api/hashtag/<tag>/tweets', methods=['GET'])
-def api_hashtag_tweets(tag):
-    """특정 해시태그의 트윗 목록 API"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    hashtag = Hashtag.query.filter_by(tag=tag).first()
-    
-    if not hashtag:
-        return jsonify({'error': 'Hashtag not found'}), 404
-    
-    tweet_hashtags = TweetHashtag.query.filter_by(hashtag_id=hashtag.id).order_by(TweetHashtag.created_at.desc()).all()
-    tweets = [Tweet.query.get(th.tweet_id) for th in tweet_hashtags]
-    
-    return jsonify({
-        'hashtag': tag,
-        'tweet_count': len(tweets),
-        'tweets': [{
-            'id': tweet.id,
-            'content': tweet.content,
-            'author': tweet.author.username,
             'created_at': tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')
         } for tweet in tweets]
     }), 200
