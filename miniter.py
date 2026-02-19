@@ -31,21 +31,14 @@ def get_all_users():
             SELECT id, name, email, profile
             FROM users
         """)).fetchall()
-    return [{
-        'id'      : user[0],
-        'name'    : user[1],
-        'email'   : user[2],
-        'profile' : user[3]
-    } for user in users]
+    return [{'id': u[0], 'name': u[1], 'email': u[2], 'profile': u[3]} for u in users]
 
 def delete_tweet(tweet_id):
     with current_app.database.begin() as conn:
         result = conn.execute(text("""
-            DELETE FROM tweets
-            WHERE id = :tweet_id
+            DELETE FROM tweets WHERE id = :tweet_id
         """), {'tweet_id': tweet_id})
         return result.rowcount
-
 
 def update_user(user_id, data):
     with current_app.database.begin() as conn:
@@ -54,7 +47,7 @@ def update_user(user_id, data):
             SET name = :name, profile = :profile
             WHERE id = :user_id
         """), {'name': data['name'], 'profile': data['profile'], 'user_id': user_id})
-        return result.rowcount        
+        return result.rowcount
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -78,25 +71,25 @@ def create_app(test_config=None):
         new_user_id = insert_user(new_user)
         return jsonify(get_user(new_user_id))
 
-        @app.route('/user/<int:user_id>', methods=['GET'])
+    @app.route('/user/<int:user_id>', methods=['GET'])
     def get_user_info(user_id):
         user = get_user(user_id)
         if user is None:
             return '사용자가 존재하지 않습니다.', 404
         return jsonify(user)
 
-        @app.route('/users', methods=['GET'])
+    @app.route('/users', methods=['GET'])
     def user_list():
         return jsonify(get_all_users())
 
-       @app.route('/tweet/<int:tweet_id>', methods=['DELETE'])
+    @app.route('/tweet/<int:tweet_id>', methods=['DELETE'])
     def delete_tweet_endpoint(tweet_id):
         rows = delete_tweet(tweet_id)
         if rows == 0:
             return '트윗이 존재하지 않습니다.', 404
-        return '', 200 
+        return '', 200
 
-        @app.route('/user/<int:user_id>', methods=['PUT'])
+    @app.route('/user/<int:user_id>', methods=['PUT'])
     def update_user_info(user_id):
         data = request.json
         rows = update_user(user_id, data)
