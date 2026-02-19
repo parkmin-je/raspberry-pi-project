@@ -46,6 +46,16 @@ def delete_tweet(tweet_id):
         """), {'tweet_id': tweet_id})
         return result.rowcount
 
+
+def update_user(user_id, data):
+    with current_app.database.begin() as conn:
+        result = conn.execute(text("""
+            UPDATE users
+            SET name = :name, profile = :profile
+            WHERE id = :user_id
+        """), {'name': data['name'], 'profile': data['profile'], 'user_id': user_id})
+        return result.rowcount        
+
 def create_app(test_config=None):
     app = Flask(__name__)
     app.json_provider_class = CustomJSONProvider
@@ -85,5 +95,13 @@ def create_app(test_config=None):
         if rows == 0:
             return '트윗이 존재하지 않습니다.', 404
         return '', 200 
+
+        @app.route('/user/<int:user_id>', methods=['PUT'])
+    def update_user_info(user_id):
+        data = request.json
+        rows = update_user(user_id, data)
+        if rows == 0:
+            return '사용자가 존재하지 않습니다.', 404
+        return jsonify(get_user(user_id))
 
     return app
