@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>센서 대시보드</title>
+    <meta http-equiv="refresh" content="10">
+    <style>
+        body  { font-family: sans-serif; margin: 40px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: center; }
+        th    { background-color: #4472C4; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .stats { display:flex; gap:40px; margin-bottom:20px; }
+        .stat-box { background:#f0f4ff; padding:16px 24px; border-radius:8px; text-align:center; }
+        .alert-box { background:#FF4444; color:white; padding:12px; font-size:1.2em; margin-bottom:16px; border-radius:6px; }
+        .hot  { background-color: #FFCCCC; }
+        .cold { background-color: #CCE5FF; }
+        .good { background-color: #CCFFCC; }
+    </style>
+</head>
+<body>
+    <h1>🌡️ DHT11 센서 대시보드</h1>
+
+    {% if alert %}
+    <div class="alert-box">
+        ⚠️ 경보! 현재 온도가 {{ limit }}°C를 초과했습니다!
+    </div>
+    {% endif %}
+
+    {% if records %}
+    <div class="stats">
+        <div class="stat-box">
+            <strong>총 측정 횟수</strong><br>
+            {{ records | length }} 회
+        </div>
+        <div class="stat-box">
+            <strong>최근 온도</strong><br>
+            {{ records[0].temperature }} °C
+        </div>
+        <div class="stat-box">
+            <strong>최근 습도</strong><br>
+            {{ records[0].humidity }} %
+        </div>
+        <div class="stat-box">
+            <strong>평균 온도</strong><br>
+            {{ stats.avg_temp | round(1) }} °C
+        </div>
+        <div class="stat-box">
+            <strong>최고 온도</strong><br>
+            {{ stats.max_temp }} °C
+        </div>
+        <div class="stat-box">
+            <strong>최저 온도</strong><br>
+            {{ stats.min_temp }} °C
+        </div>
+    </div>
+
+    <p>
+        <a href="/collect">📥 지금 데이터 수집</a> |
+        <a href="/analysis">📊 시간대별 분석</a>
+    </p>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>온도 (°C)</th>
+            <th>습도 (%)</th>
+            <th>상태</th>
+            <th>측정 시각</th>
+        </tr>
+        {% for row in records %}
+        <tr class="{% if row.temperature >= 28 %}hot{% elif row.temperature <= 20 %}cold{% else %}good{% endif %}">
+            <td>{{ row.id }}</td>
+            <td>{{ row.temperature }}</td>
+            <td>{{ row.humidity }}</td>
+            <td>
+                {% if row.temperature >= 28 %}
+                    🔴 더움
+                {% elif row.temperature <= 20 %}
+                    🔵 추움
+                {% else %}
+                    🟢 쾌적
+                {% endif %}
+            </td>
+            <td>{{ row.measured_at }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <canvas id="myChart" width="800" height="300" style="margin-top:30px;"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    fetch('/api/chart')
+        .then(res => res.json())
+        .then(data => {
+            new Chart(document.getElementById('myChart'), {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: '온도 (°C)',
+                            data: data.temperatures,
+                            borderColor: 'red',
+                            fill: false
+                        },
+                        {
+                            label: '습도 (%)',
+                            data: data.humidities,
+                            borderColor: 'blue',
+                            fill: false
+                        }
+                    ]
+                }
+            });
+        });
+    </script>
+
+    {% else %}
+        <p>저장된 데이터가 없습니다. 위 링크를 눌러 데이터를 수집하세요.</p>
+    {% endif %}
+
+</body>
+</html>

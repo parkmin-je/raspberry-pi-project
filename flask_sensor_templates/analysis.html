@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>시간대별 분석</title>
+    <style>
+        body  { font-family: sans-serif; margin: 40px; }
+        table { border-collapse: collapse; width: 50%; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: center; }
+        th    { background-color: #4472C4; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>📊 시간대별 평균 온도</h1>
+
+    <table>
+        <tr>
+            <th>시간</th>
+            <th>평균 온도</th>
+            <th>측정 횟수</th>
+        </tr>
+        {% for row in hourly %}
+        <tr>
+            <td>{{ row.hour }}시</td>
+            <td>{{ row.avg_temp | round(1) }}°C</td>
+            <td>{{ row.count }}회</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <p><a href="/">← 돌아가기</a></p>
+</body>
+</html>
+
+
+
