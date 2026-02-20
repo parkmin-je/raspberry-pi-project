@@ -15,7 +15,7 @@ def get_connection():
         charset="utf8mb4"
     )
 
-# ── 센서 읽기 (지금은 테스트용 가짜 데이터) ──
+# ── 센서 읽기 (테스트용 랜덤 데이터) ──────────
 def read_sensor():
     try:
         import random
@@ -27,18 +27,7 @@ def read_sensor():
         print("센서 오류:", e)
         return None
 
-# ── 데이터 저장 ──────────────────────────────
-def save_to_db(temperature, humidity):
-    conn   = get_connection()
-    cursor = conn.cursor()
-    sql    = "INSERT INTO sensor_data (temperature, humidity) VALUES (%s, %s)"
-    cursor.execute(sql, (temperature, humidity))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    cleanup_old_records()
-
-# ── 오래된 데이터 자동 삭제 ───────────────────
+# ── 오래된 데이터 자동 삭제 (미션 4) ──────────
 MAX_RECORDS = 100
 
 def cleanup_old_records():
@@ -53,25 +42,23 @@ def cleanup_old_records():
             (delete_count,)
         )
         conn.commit()
-        print(f"{delete_count}개 삭제됨")
+        print(f"{delete_count}개 삭제됨 (현재 {MAX_RECORDS}개 유지)")
     cursor.close()
     conn.close()
 
-# ── 데이터 조회 ──────────────────────────────
-def get_records(limit=10):
+# ── 데이터 저장 ──────────────────────────────
+def save_to_db(temperature, humidity):
     conn   = get_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
-    cursor.execute(
-        "SELECT * FROM sensor_data ORDER BY measured_at DESC LIMIT %s",
-        (limit,)
-    )
-    rows = cursor.fetchall()
+    cursor = conn.cursor()
+    sql    = "INSERT INTO sensor_data (temperature, humidity) VALUES (%s, %s)"
+    cursor.execute(sql, (temperature, humidity))
+    conn.commit()
     cursor.close()
     conn.close()
-    return rows
+    cleanup_old_records()  # 미션 4 — 저장 후 정리
 
 # ── 자동 수집 스레드 ─────────────────────────
-TEMP_LIMIT = 30
+TEMP_LIMIT = 30  # 미션 3 — 경보 기준 온도
 
 def auto_collect(interval=10):
     while True:
@@ -81,24 +68,41 @@ def auto_collect(interval=10):
             print(f"저장됨: {data['temperature']}°C, {data['humidity']}%")
         time.sleep(interval)
 
-# ── 라우트 ───────────────────────────────────
+# ── 메인 라우트 (미션 1, 2, 3 통합) ──────────
 @app.route('/')
 def index():
     conn   = get_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
+
+    # 최근 10개 조회
     cursor.execute("SELECT * FROM sensor_data ORDER BY measured_at DESC LIMIT 10")
     records = cursor.fetchall()
-    cursor.execute("SELECT AVG(temperature) AS avg_temp, MAX(temperature) AS max_temp, MIN(temperature) AS min_temp FROM sensor_data")
+
+    # 미션 1 — 통계 (AVG, MAX, MIN)
+    cursor.execute("""
+        SELECT
+            AVG(temperature) AS avg_temp,
+            MAX(temperature) AS max_temp,
+            MIN(temperature) AS min_temp
+        FROM sensor_data
+    """)
     stats = cursor.fetchone()
+
     cursor.close()
     conn.close()
 
+    # 미션 3 — 경보 확인
     alert = False
     if records and records[0]["temperature"] >= TEMP_LIMIT:
         alert = True
 
-    return render_template("index.html", records=records, stats=stats, alert=alert, limit=TEMP_LIMIT)
+    return render_template("index.html",
+                           records=records,
+                           stats=stats,
+                           alert=alert,
+                           limit=TEMP_LIMIT)
 
+# ── 데이터 수집 라우트 ───────────────────────
 @app.route('/collect')
 def collect():
     data = read_sensor()
@@ -108,21 +112,28 @@ def collect():
     else:
         return "센서 데이터를 읽을 수 없습니다.", 500
 
+# ── 미션 5 — Chart.js API 라우트 ─────────────
 @app.route('/api/chart')
 def chart_data():
     conn   = get_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
-    cursor.execute(
-        "SELECT temperature, humidity, measured_at FROM sensor_data ORDER BY measured_at ASC LIMIT 20"
-    )
+    cursor.execute("""
+        SELECT temperature, humidity, measured_at
+        FROM sensor_data
+        ORDER BY measured_at ASC
+        LIMIT 20
+    """)
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
+
     labels = [str(row["measured_at"]) for row in rows]
     temps  = [float(row["temperature"]) for row in rows]
     hums   = [float(row["humidity"])    for row in rows]
+
     return jsonify({"labels": labels, "temperatures": temps, "humidities": hums})
 
+# ── 미션 6 — 시간대별 분석 라우트 ─────────────
 @app.route('/analysis')
 def analysis():
     conn   = get_connection()

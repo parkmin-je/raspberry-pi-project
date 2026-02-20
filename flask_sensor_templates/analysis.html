@@ -13,13 +13,8 @@
 </head>
 <body>
     <h1>📊 시간대별 평균 온도</h1>
-
     <table>
-        <tr>
-            <th>시간</th>
-            <th>평균 온도</th>
-            <th>측정 횟수</th>
-        </tr>
+        <tr><th>시간</th><th>평균 온도</th><th>측정 횟수</th></tr>
         {% for row in hourly %}
         <tr>
             <td>{{ row.hour }}시</td>
@@ -28,10 +23,6 @@
         </tr>
         {% endfor %}
     </table>
-
     <p><a href="/">← 돌아가기</a></p>
 </body>
 </html>
-
-
-

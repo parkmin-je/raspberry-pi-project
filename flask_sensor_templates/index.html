@@ -9,8 +9,7 @@
         table { border-collapse: collapse; width: 100%; }
         th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: center; }
         th    { background-color: #4472C4; color: white; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        .stats { display:flex; gap:40px; margin-bottom:20px; }
+        .stats { display:flex; gap:40px; margin-bottom:20px; flex-wrap:wrap; }
         .stat-box { background:#f0f4ff; padding:16px 24px; border-radius:8px; text-align:center; }
         .alert-box { background:#FF4444; color:white; padding:12px; font-size:1.2em; margin-bottom:16px; border-radius:6px; }
         .hot  { background-color: #FFCCCC; }
@@ -30,28 +29,22 @@
     {% if records %}
     <div class="stats">
         <div class="stat-box">
-            <strong>총 측정 횟수</strong><br>
-            {{ records | length }} 회
+            <strong>총 측정 횟수</strong><br>{{ records | length }} 회
         </div>
         <div class="stat-box">
-            <strong>최근 온도</strong><br>
-            {{ records[0].temperature }} °C
+            <strong>최근 온도</strong><br>{{ records[0].temperature }} °C
         </div>
         <div class="stat-box">
-            <strong>최근 습도</strong><br>
-            {{ records[0].humidity }} %
+            <strong>최근 습도</strong><br>{{ records[0].humidity }} %
         </div>
         <div class="stat-box">
-            <strong>평균 온도</strong><br>
-            {{ stats.avg_temp | round(1) }} °C
+            <strong>평균 온도</strong><br>{{ stats.avg_temp | round(1) }} °C
         </div>
         <div class="stat-box">
-            <strong>최고 온도</strong><br>
-            {{ stats.max_temp }} °C
+            <strong>최고 온도</strong><br>{{ stats.max_temp }} °C
         </div>
         <div class="stat-box">
-            <strong>최저 온도</strong><br>
-            {{ stats.min_temp }} °C
+            <strong>최저 온도</strong><br>{{ stats.min_temp }} °C
         </div>
     </div>
 
@@ -62,11 +55,7 @@
 
     <table>
         <tr>
-            <th>ID</th>
-            <th>온도 (°C)</th>
-            <th>습도 (%)</th>
-            <th>상태</th>
-            <th>측정 시각</th>
+            <th>ID</th><th>온도 (°C)</th><th>습도 (%)</th><th>상태</th><th>측정 시각</th>
         </tr>
         {% for row in records %}
         <tr class="{% if row.temperature >= 28 %}hot{% elif row.temperature <= 20 %}cold{% else %}good{% endif %}">
@@ -74,13 +63,9 @@
             <td>{{ row.temperature }}</td>
             <td>{{ row.humidity }}</td>
             <td>
-                {% if row.temperature >= 28 %}
-                    🔴 더움
-                {% elif row.temperature <= 20 %}
-                    🔵 추움
-                {% else %}
-                    🟢 쾌적
-                {% endif %}
+                {% if row.temperature >= 28 %}🔴 더움
+                {% elif row.temperature <= 20 %}🔵 추움
+                {% else %}🟢 쾌적{% endif %}
             </td>
             <td>{{ row.measured_at }}</td>
         </tr>
@@ -98,18 +83,8 @@
                 data: {
                     labels: data.labels,
                     datasets: [
-                        {
-                            label: '온도 (°C)',
-                            data: data.temperatures,
-                            borderColor: 'red',
-                            fill: false
-                        },
-                        {
-                            label: '습도 (%)',
-                            data: data.humidities,
-                            borderColor: 'blue',
-                            fill: false
-                        }
+                        { label: '온도 (°C)', data: data.temperatures, borderColor: 'red',  fill: false },
+                        { label: '습도 (%)',  data: data.humidities,   borderColor: 'blue', fill: false }
                     ]
                 }
             });
@@ -117,8 +92,7 @@
     </script>
 
     {% else %}
-        <p>저장된 데이터가 없습니다. 위 링크를 눌러 데이터를 수집하세요.</p>
+    <p>저장된 데이터가 없습니다. 위 링크를 눌러 데이터를 수집하세요.</p>
     {% endif %}
-
 </body>
 </html>
